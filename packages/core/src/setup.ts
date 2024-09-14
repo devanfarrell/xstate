@@ -1,6 +1,6 @@
 import { StateMachine } from './StateMachine';
 import { createMachine } from './createMachine';
-import { GuardPredicate } from './guards';
+import { GuardSetupPredicate } from './guards';
 
 import {
   ActionFunction,
@@ -128,7 +128,7 @@ export function setup<
     >;
   };
   guards?: {
-    [K in keyof TGuards]: GuardPredicate<
+    [K in keyof TGuards]: GuardSetupPredicate<
       TContext,
       TEvent,
       TGuards[K],

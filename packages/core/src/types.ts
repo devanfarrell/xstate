@@ -312,7 +312,8 @@ export interface TransitionConfig<
   TEmitted extends EventObject = EventObject,
   TMeta extends MetaObject = MetaObject
 > {
-  guard?: Guard<TContext, TExpressionEvent, undefined, TGuard>;
+  // should the third be TGuard['params']
+  guard?: Guard<TContext, TExpressionEvent, TGuard['params'], TGuard>;
   actions?: Actions<
     TContext,
     TExpressionEvent,

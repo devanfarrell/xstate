@@ -46,6 +46,16 @@ export type GuardPredicate<
   _out_TGuard?: TGuard;
 };
 
+export type GuardSetupPredicate<
+  TContext extends MachineContext,
+  TExpressionEvent extends EventObject,
+  TParams extends ParameterizedObject['params'] | undefined,
+  TGuard extends ParameterizedObject
+> = {
+  (args: GuardArgs<TContext, TExpressionEvent>, params: TParams): boolean;
+  _out_TGuard?: TGuard;
+};
+
 export interface GuardArgs<
   TContext extends MachineContext,
   TExpressionEvent extends EventObject
@@ -167,18 +177,26 @@ function checkNot(
  *
  * @returns A guard
  */
+// export function not<
+//   TContext extends MachineContext,
+//   TExpressionEvent extends EventObject,
+//   TGuard
+// >(
+//   guard: SingleGuardArg<TContext, TExpressionEvent, unknown, TGuard>
+// ): GuardSetupPredicate<
+//   TContext,
+//   TExpressionEvent,
+//   unknown,
+//   NormalizeGuardArg<DoNotInfer<TGuard>>
+// >;
 export function not<
   TContext extends MachineContext,
   TExpressionEvent extends EventObject,
-  TArg
+  TParams extends ParameterizedObject['params'] | undefined,
+  TGuard extends ParameterizedObject
 >(
-  guard: SingleGuardArg<TContext, TExpressionEvent, unknown, TArg>
-): GuardPredicate<
-  TContext,
-  TExpressionEvent,
-  unknown,
-  NormalizeGuardArg<DoNotInfer<TArg>>
-> {
+  guard: Guard<TContext, TExpressionEvent, TParams, TGuard>
+): GuardPredicate<TContext, TExpressionEvent, TParams, TGuard> {
   function not(args: GuardArgs<TContext, TExpressionEvent>, params: unknown) {
     if (isDevelopment) {
       throw new Error(`This isn't supposed to be called`);
@@ -231,27 +249,35 @@ function checkAnd(
  *
  * @returns A guard action object
  */
+// export function and<
+//   TContext extends MachineContext,
+//   TExpressionEvent extends EventObject,
+//   TGuard extends unknown[]
+// >(
+//   guards: readonly [
+//     ...{
+//       [K in keyof TGuard]: SingleGuardArg<
+//         TContext,
+//         TExpressionEvent,
+//         unknown,
+//         TGuard[K]
+//       >;
+//     }
+//   ]
+// ): GuardSetupPredicate<
+//   TContext,
+//   TExpressionEvent,
+//   unknown,
+//   NormalizeGuardArgArray<DoNotInfer<TGuard>>
+// >;
 export function and<
   TContext extends MachineContext,
   TExpressionEvent extends EventObject,
-  TArg extends unknown[]
+  TParams extends ParameterizedObject['params'] | undefined,
+  TGuard extends ParameterizedObject
 >(
-  guards: readonly [
-    ...{
-      [K in keyof TArg]: SingleGuardArg<
-        TContext,
-        TExpressionEvent,
-        unknown,
-        TArg[K]
-      >;
-    }
-  ]
-): GuardPredicate<
-  TContext,
-  TExpressionEvent,
-  unknown,
-  NormalizeGuardArgArray<DoNotInfer<TArg>>
-> {
+  guards: readonly Guard<TContext, TExpressionEvent, TParams, TGuard>[]
+): GuardPredicate<TContext, TExpressionEvent, TParams, TGuard> {
   function and(args: GuardArgs<TContext, TExpressionEvent>, params: unknown) {
     if (isDevelopment) {
       throw new Error(`This isn't supposed to be called`);
@@ -302,27 +328,36 @@ function checkOr(
  *
  * @returns A guard action object
  */
+// export function or<
+//   TContext extends MachineContext,
+//   TExpressionEvent extends EventObject,
+//   TGuard extends unknown[]
+// >(
+//   guards: readonly [
+//     ...{
+//       [K in keyof TGuard]: SingleGuardArg<
+//         TContext,
+//         TExpressionEvent,
+//         unknown,
+//         TGuard[K]
+//       >;
+//     }
+//   ]
+// ): GuardSetupPredicate<
+//   TContext,
+//   TExpressionEvent,
+//   unknown,
+//   NormalizeGuardArgArray<DoNotInfer<TGuard>>
+// >;
+
 export function or<
   TContext extends MachineContext,
   TExpressionEvent extends EventObject,
-  TArg extends unknown[]
+  TParams extends ParameterizedObject['params'] | undefined,
+  TGuard extends ParameterizedObject
 >(
-  guards: readonly [
-    ...{
-      [K in keyof TArg]: SingleGuardArg<
-        TContext,
-        TExpressionEvent,
-        unknown,
-        TArg[K]
-      >;
-    }
-  ]
-): GuardPredicate<
-  TContext,
-  TExpressionEvent,
-  unknown,
-  NormalizeGuardArgArray<DoNotInfer<TArg>>
-> {
+  guards: readonly Guard<TContext, TExpressionEvent, TParams, TGuard>[]
+): GuardPredicate<TContext, TExpressionEvent, TParams, TGuard> {
   function or(args: GuardArgs<TContext, TExpressionEvent>, params: unknown) {
     if (isDevelopment) {
       throw new Error(`This isn't supposed to be called`);

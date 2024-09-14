@@ -17,6 +17,7 @@ import {
   Spawner,
   StateMachine,
   UnknownActorRef,
+  and,
   assign,
   createActor,
   createMachine,
@@ -3381,6 +3382,116 @@ describe('enqueueActions', () => {
         }
       }
     );
+  });
+
+  it('should allow mixed guard patterns with logical guard operators', () => {
+    setup({
+      types: {} as {
+        events: { type: 'TEST'; value: number };
+        context: { empty: '' };
+      },
+      guards: {
+        paramGuard: (_, _arg: number) => true,
+        plainGuard: () => true
+      }
+    }).createMachine({
+      context: () => ({ empty: '' }),
+      states: {
+        plainAnd: {
+          on: {
+            TEST: {
+              guard: and(['plainGuard', 'plainGuard'])
+            }
+          }
+        },
+        plainAndWithObjects: {
+          on: {
+            TEST: {
+              guard: and([{ type: 'plainGuard' }, { type: 'plainGuard' }])
+            }
+          }
+        },
+        plainAndWithMixed: {
+          on: {
+            TEST: {
+              guard: and(['plainGuard', { type: 'plainGuard' }])
+            }
+          }
+        },
+        // ! Failing
+        parameterizedAnd: {
+          on: {
+            TEST: {
+              guard: and([
+                { type: 'paramGuard', params: () => 1 },
+                { type: 'paramGuard', params: () => 1 }
+              ])
+            }
+          }
+        },
+        // ! Failing
+        plainAndParameterizedAnd: {
+          on: {
+            TEST: {
+              guard: and([
+                { type: 'plainGuard' },
+                { type: 'paramGuard', params: () => 1 }
+              ])
+            }
+          }
+        },
+        plainNot: {
+          on: {
+            TEST: {
+              guard: not('plainGuard')
+            }
+          }
+        },
+        // ! Failing
+        parameterizedNot: {
+          on: {
+            TEST: {
+              guard: not({
+                type: 'paramGuard',
+                params: ({ context, event }) => 1
+              })
+            }
+          }
+        },
+        plainComposedAndNot: {
+          on: {
+            TEST: {
+              guard: and([{ type: 'plainGuard' }, not('plainGuard')])
+            }
+          }
+        },
+        // ! Failing
+        parameterizedComposedAndNot: {
+          on: {
+            TEST: {
+              guard: and([
+                { type: 'paramGuard', params: () => 1 },
+                not({ type: 'paramGuard', params: () => 1 })
+              ])
+            }
+          }
+        },
+        inlineNot: {
+          on: {
+            TEST: {
+              guard: not(({ context, event }) => true)
+            }
+          }
+        },
+        baseCase: {
+          on: {
+            TEST: {
+              guard: { type: 'paramGuard', params: ({ event }) => event.value }
+            }
+          }
+        }
+      }
+    });
   });
 
   it('should be able to enqueue `raise` using its own action creator in a transition with one of the other accepted event types', () => {
